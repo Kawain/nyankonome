@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex,nofollow">
+    <title>テキスト形式</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+
+<body>
+    <pre>
+{%- for id, editor, title in lists %}
+{{id}}
+{{title}}
+{{editor}}
+---------------------------------------------------------------------------------------------------
+{%- endfor %}
+    </pre>
+</body>
+
+</html>

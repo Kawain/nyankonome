@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="robots" content="noindex,nofollow">
+    <title>下書き</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+</head>
+
+<body>
+    <div class="container" id="app">
+
+        <div style="margin-bottom: 20px;">
+            <a href="{{ url_for('index') }}" style="text-decoration: none;color: #007bff;">← 戻る</a>
+        </div>
+
+        <div class="div_title">
+            <h1 style="font-size: 30px;">{{id}}</h1>
+        </div>
+
+        <h2>担当者</h2>
+        <input v-model="editor" type="text" class="form-control" style="margin-bottom: 20px;">
+
+        <h2>商品タイトル <small>残り：{{ '{{ nowcount }}' }} 半角文字</small></h2>
+        <input @keyup="checkCount" v-model="title" id="title" type="text" class="form-control"
+            style="margin-bottom: 20px;">
+
+        <h2>商品説明 <small><a href="{{ url_for('html',id=id) }}" target="_blank"
+                    style="text-decoration: none;color: #007bff;">HTML表示(コピーペースト用)</a></small></h2>
+        <textarea @keyup="explainDown" v-model="explain" cols="30" rows="10" class="form-control"
+            style="margin-bottom: 20px;"></textarea>
+
+        <div style="text-align:center;margin:50px 0;">
+            <button id="btnUpdate">保存する</button>
+        </div>
+
+        <div class="div_title form-control" style="margin-bottom: 20px;">
+            <h3>{{ '{{ title }}' }}</h3>
+        </div>
+
+        <!--テンプレートここから-->
+        {{template|safe}}
+        <!--テンプレートここまで-->
+        <div style="text-align:center;margin:50px 0;">
+            <button onclick="window.scrollTo(0,0);">先頭に戻る</button>
+        </div>
+    </div>
+    <script>
+        const maxtitle = 128;
+        //文字数を返す
+        function charcount(str) {
+            let len = 0;
+            str = escape(str);
+            for (let i = 0; i < str.length; i++, len++) {
+                if (str.charAt(i) === "%") {
+                    if (str.charAt(++i) === "u") {
+                        i += 3;
+                        len++;
+                    }
+                    i++;
+                }
+            }
+            return len;
+        }
+
+        const obj = {
+            "id": "",
+            "editor": "",
+            "title": "",
+            "explain": "",
+            "explain2": "",
+            "nowcount": ""
+        };
+
+        const app = new Vue({
+            el: '#app',
+            data: obj,
+            mounted: function () {
+                this.explainDown(); //method1 will execute at pageload
+            },
+            methods: {
+                explainDown() {
+                    obj.explain2 = obj.explain.replace(/\r?\n/g, '<br>');
+                },
+                checkCount() {
+                    let len = charcount(obj.title);
+                    this.nowcount = maxtitle - len;
+                    if (this.nowcount < 0) {
+                        document.getElementById('title').style.borderColor = "#ff0000";
+                    } else {
+                        document.getElementById('title').style.borderColor = "#0000ff";
+                    }
+                }
+            }
+        })
+
+        //fetch GET
+        fetch('/select/{{id}}')
+            .then(response => {
+                if (response.status !== 200) {
+                    return Promise.reject(response.status);
+                }
+                return response.json();
+            })
+            .then(json => {
+                obj.id = json.id;
+                obj.editor = json.editor;
+
+                if (json.title !== "") {
+                    obj.title = json.title;
+                } else {
+                    obj.title = "〇ブランド〇商品名〇()〇色〇柄・プリント等〇特徴〇 〇〇〇〇〇〇";
+                }
+
+                if (json.explain !== "") {
+                    obj.explain = json.explain;
+                } else {
+                    obj.explain = `★の★です。
+
+色は★です。
+★綿100％。
+
+サイズは★
+実寸は約、身幅★ｃｍ・丈★ｃｍ
+
+
+数回の使用でとってもきれいです。
+普通に使用しましたがきれいです。
+たくさん着ましたが、まだまだかわいく着られますよ♪
+
+`;
+                }
+
+                obj.explain2 = obj.explain.replace(/\r?\n/g, '<br>');
+                const len = charcount(obj.title);
+                obj.nowcount = maxtitle - len;
+            })
+            .catch((err) => {
+                alert(err);
+            });
+
+        document.getElementById('btnUpdate').addEventListener('click', () => {
+            //フォームを作る
+            const form = new FormData();
+            form.append('editor', obj.editor);
+            form.append('title', obj.title);
+            form.append('explain', obj.explain);
+            //fetch POST
+            fetch('/update/{{id}}', {
+                    method: 'POST',
+                    body: form
+                })
+                .then(response => {
+                    if (response.status !== 200) {
+                        return Promise.reject(response.status);
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    if (text === "ok") {
+                        alert("保存しました");
+                    } else {
+                        alert("失敗しました");
+                    }
+                })
+                .catch((err) => {
+                    alert(err);
+                });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="robots" content="noindex,nofollow">
+    <title>エラー</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <div style="margin-bottom: 20px;">
+            <a href="{{ url_for('index') }}" style="text-decoration: none;color: #007bff;">← 戻る</a>
+        </div>
+
+        <div class="div_title">
+            <h1 style="font-size: 30px;">{{message}}</h1>
+        </div>
+    </div>
+</body>
+
+</html>
