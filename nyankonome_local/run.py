@@ -350,7 +350,7 @@ def csv_column(csv_file):
     for v in columns:
         _columns.append(v[0])
 
-    with open(csv_file, "a", newline="", encoding='cp932') as f:
+    with open(csv_file, "a", newline="", encoding='utf-8') as f:
         # 「delimiter」に区切り文字、「quotechar」に囲い文字を指定します
         # quoting=csv.QUOTE_MINIMALを指定 必要な箇所だけに囲い文字（"）が付与
         writer = csv.writer(f, delimiter=",", quotechar='"',
@@ -395,7 +395,7 @@ def csv_row(csv_file, id, title, explain):
     # 正規表現コンパイル
     imgpat = re.compile(r"^画像\d+$")
 
-    with open(csv_file, "a", newline="", encoding='cp932') as f:
+    with open(csv_file, "a", newline="", encoding='utf-8') as f:
         # 「delimiter」に区切り文字、「quotechar」に囲い文字を指定します
         writer = csv.writer(f, delimiter=",", quotechar='"',
                             quoting=csv.QUOTE_MINIMAL)
